@@ -22,6 +22,18 @@ def get_color(value):
     return '#a52a2a'
 
 
+def get_instruction(value):
+    if value <= 50:
+        return 'TỐT - Không ảnh hưởng đến sức khỏe'
+    if value <= 100:
+        return 'TRUNG BÌNH - Nhóm nhạy cảm nên hạn chế thời gian ở ngoài'
+    if value <= 200:
+        return 'KÉM - Nhóm nhạy cảm cần hạn chế thời gian ở ngoài'
+    if value <= 300:
+        return 'XẤU - Nhóm nhạy cảm tránh ra ngoài, những người khác hạn chế ở ngoài'
+    return 'NGUY HẠI - Mọi người nên ở trong nhà'
+
+
 def parse_data(json_text):
     list_days = json.loads(json_text)["d"]
     map_days = {}
@@ -80,7 +92,14 @@ slackHookUrl = os.getenv("SLACK_HOOK")
 userAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36"
 response = requests.get(url).json()
 try:
+    aqi = response["data"]["aqi"]
+    timeStr = response["data"]["time"]["s"]
+    timeArray = timeStr.split(' ')
+    timeArray.reverse()
+    timeStr = ' '.join(timeArray)
+
     slackPayload = {
+        "text": f"Chỉ số AQI của Hà Nội lúc {timeStr} là {aqi} ({get_instruction(aqi)})",
         "attachments": [
             {
                 "author_name": "Dự báo AQI 7 ngày tới",
@@ -97,10 +116,6 @@ try:
             }
         ]
     }
-    aqi = response["data"]["aqi"]
-    time = response["data"]["time"]["s"]
-
-    slackPayload["text"] = f"Chỉ số AQI của Hà Nội lúc {time} là {aqi}."
 
     responseForecast = requests.get(forecastUrl, headers={"User-Agent": userAgent}).text
     matches = re.search("var f=\\[(.*)\\];try {var div =", responseForecast)
