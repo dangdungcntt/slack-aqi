@@ -47,9 +47,15 @@ def parse_data(json_text):
             matrix = []
 
             for record in day_data:
-                matrix.append(record["aqi"]["v"]["pm25"])
+                v = record["aqi"]["v"]
+                if "pm25" in v:
+                    matrix.append(v["pm25"])
 
             np_matrix = np.array(matrix)
+
+            if len(np_matrix) == 0:
+                continue
+
             min_value = min(np_matrix[::, 0])
             max_value = max(np_matrix[::, 1])
 
