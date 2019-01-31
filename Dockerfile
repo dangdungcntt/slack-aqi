@@ -1,9 +1,10 @@
 FROM python:3.7
 
-ADD aqi.py /
-COPY requirements.txt /var/www/requirement.txt
+WORKDIR /home
 
-RUN pip install -r /var/www/requirement.txt
+ADD . .
 
-CMD [ "python", "-u", "/aqi.py" ]
+RUN pip install -r ./requirements.txt
+
+CMD [ "python", "-u", "./main.py" ]
 
